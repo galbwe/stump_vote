@@ -4,6 +4,9 @@ stump.sublime-workspace
 # Localhost DB
 backend/stump_backend/stump_backend/db.sqlite3
 
+# Static files
+backend/stump_backend/staticfiles/
+
 # Secrets
 backend/stump_backend/.env*
 

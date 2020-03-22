@@ -130,10 +130,13 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
-STATIC_URL = '/staticfiles/'
-STATIC_ROOT = os.path.join(BASE_DIR,
-                           os.path.pardir,
-                           "staticfiles")
+STATIC_URL = os.environ.get('STATIC_URL')
+if STATIC_URL is None:  # defaults for development
+    STATIC_URL = '/staticfiles/'
+    STATIC_ROOT = os.path.join(BASE_DIR,
+                               os.path.pardir,
+                               "staticfiles")
+
 
 # Localhost React server
 CORS_ORIGIN_WHITELIST = (

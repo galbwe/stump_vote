@@ -1,5 +1,6 @@
 # IDE's
 stump.sublime-workspace
+.vscode/
 
 # Localhost DB
 backend/stump_backend/stump_backend/db.sqlite3

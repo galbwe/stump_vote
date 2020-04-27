@@ -20,7 +20,7 @@ OR
 On localhost:
 
 ```bash
-$ cd backend/stump_backend/stump_backend/ap
+$ cd backend/stump_backend/stump_backend/api
 $ pipenv sync --dev
 $ pipenv shell
 $ cd stump_backend

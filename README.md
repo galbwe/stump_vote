@@ -17,19 +17,44 @@ OR
 
 ### Quickstart
 
-On localhost:
+#### On localhost:
+1. Make sure you have a postgres database set up for development. If you do not have a locally installed instance of postgres, you can run one in a docker container with
 
 ```bash
-$ cd backend/stump_backend/stump_backend/api
+docker run --name stump_backend_postgres -e POSTGRES_PASSWORD=stump_dev -e POSTGRES_USER=stump_dev -e POSTGRES_DB=stump_dev -d -p 5432:5432 --rm postgres
+```
+
+2. Set the following environment variables in the terminal
+
+```bash
+export SECRET_KEY=my_precious
+export DEBUG=1
+export ALLOWED_HOSTS=localhost
+export DB_NAME=stump_dev
+export DB_USER=stump_dev
+export DB_PASSWORD=stump_dev
+export DB_HOST=localhost
+export DB_PORT=5432
+```
+
+3. Create a directory for serving react app:
+```bash
+mkdir backend/stump_backend/stump_backend/static/stump-vote-frontend-demo
+```
+
+4. Install python dependencies, apply database migrations, create an admin user, and run a server locally:
+
+```bash
+$ cd backend/stump_backend
 $ pipenv sync --dev
 $ pipenv shell
-$ cd stump_backend
+$ cd stump_backend 
 $ python manage.py migrate
 $ python manage.py createsuperuser
 $ python manage.py runserver
 ```
 
-With docker-compose:
+#### With docker-compose:
 1. Copy and paste the following environment variables into ```backend/api/.env.dev```:
 ```bash
 DEBUG=1

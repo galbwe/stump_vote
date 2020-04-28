@@ -20,3 +20,13 @@ node_modules/
 
 # Ignore side-loaded files fetched by gulp
 backend/stump_backend/stump_backend/static/stump-vote-frontend-demo/
+
+# Test data
+backend/stump_backend/tests/data/
+
+# Virtual Environments
+**/venv/
+
+# Requirements files for developers using pip
+**/requirements.txt
+**/__pycache__/

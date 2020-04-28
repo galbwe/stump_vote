@@ -35,6 +35,7 @@ export DB_USER=stump_dev
 export DB_PASSWORD=stump_dev
 export DB_HOST=localhost
 export DB_PORT=5432
+export CIVICENGINE_API_KEY=<your civic engine api key>
 ```
 
 3. Create a directory for serving react app:

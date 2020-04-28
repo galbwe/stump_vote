@@ -11,6 +11,7 @@ class ApiCaller(object):
         if not hasattr(self, 'base_url'):
             raise ValueError("Missing base_url")
         self.base_url = getattr(self, 'base_url')
+        self.timeout = kwargs.get('timeout', 10)
 
     def _get_headers(self):
         '''
@@ -43,7 +44,7 @@ class ApiCaller(object):
         headers = self._get_headers()
         # Makes the actual call to the API
         # TODO: Add error handling, timeouts, and request throttling
-        response = requests.get(full_url, headers=headers, params=optional_params)
+        response = requests.get(full_url, headers=headers, params=optional_params, timeout=self.timeout)
         return response
 
     def fetch(self, resource, *args, **kwargs):
@@ -93,11 +94,13 @@ class CivicEngineApi(ApiCaller):
     # Resources that are appended to the base_url
     CANDIDATE_RESOURCE = 'candidate'
     DISTRICTS_RESOURCE = 'districts'
+    ELECTIONS_RESOURCE = 'elections'
 
     # This whitelist is used for validating the optional parameters
     resource_optional_params_map = {
         CANDIDATE_RESOURCE: ('election_id', 'tenant_id'),
         DISTRICTS_RESOURCE: ('address', 'lat', 'long'),
+        ELECTIONS_RESOURCE: ('end_at', 'latitude', 'longitude', 'start_at', 'state', 'updated_since')
     }
 
     def __init__(self, *args, **kwargs):
@@ -113,7 +116,7 @@ class CivicEngineApi(ApiCaller):
         # return the tuple (success, json)
         return result
 
-    def get_districts(self, optional_params):
+    def get_districts(self, optional_params=None):
         '''
         GET /districts
         See https://developers.civicengine.com/docs/api/districts/list

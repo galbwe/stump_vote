@@ -22,7 +22,7 @@ node_modules/
 backend/stump_backend/stump_backend/static/stump-vote-frontend-demo/
 
 # Test data
-backend/stump_backend/tests/data/
+**/data/
 
 # Virtual Environments
 **/venv/

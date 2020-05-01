@@ -75,11 +75,34 @@ class TestLiveCivicEngineApi(TestCase):
         self.assertJSONEqual(json.dumps(json_), json.dumps(saved_json))
 
 
-    def test_get_candidates(self):
-        pass
-
     def test_get_elections(self):
-        pass
+        optional_params = {
+            'latitude': 39.7416945,
+            'longitude': -104.9883106,
+            'start_at': '2018-01-01',
+            'end_at': '2019-01-01',
+        }
+        try:
+            success, json_ = self.api.get_elections(optional_params=optional_params)
+            assert success, (
+                f'Error calling get elections',
+                f'\nURL\n\t{self.api.base_url}/elections?{"&".join(str(p) + "=" + str(v) for (p, v) in optional_params.items())}'
+                f'\nresponse_code\n\t{json_["status_code"]}.',
+                f'\nresponse_body\n\t{json.dumps(json_["service_response"], indent=2, default=str)}')
+        except Timeout:
+            assert False, (
+                f'Timeout calling get elections after {self.api.timeout} seconds.',
+                f'\nURL\n\t{self.api.base_url}/elections?{"&".join(str(p) + "=" + str(v) for (p, v) in optional_params.items())}'
+            )
+        # check that the data matches what is saved on disk
+        saved_json = self._get_saved_response('elections')
+        assert saved_json is not None
+        self.assertIn('timestamp', json_)
+        # example timestamp: 2020-05-01T02:58:11.283642
+        self.assertRegexpMatches(json_['timestamp'], r'20\d\d-\d{2}-\d{2}T\d{2}:\d{2}.\d{2}\.\d{6}')
+        del json_['timestamp']
+        del saved_json['timestamp']
+        self.assertJSONEqual(json.dumps(json_), json.dumps(saved_json))
 
     def _save_response_to_data_directory(self, response):
         pass

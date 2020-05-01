@@ -133,4 +133,6 @@ class CivicEngineApi(ApiCaller):
         See https://developers.civicengine.com/docs/api/elections/list
         '''
         # TODO
-        pass
+        result = self.fetch(self.ELECTIONS_RESOURCE, optional_params=optional_params)
+        # return the tuple (success, json)
+        return result

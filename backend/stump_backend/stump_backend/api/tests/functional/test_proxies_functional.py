@@ -1,5 +1,6 @@
 import json
 import os
+from operator import itemgetter
 
 from django.test import TestCase
 from requests.exceptions import Timeout
@@ -36,10 +37,20 @@ class TestLiveCivicEngineApi(TestCase):
                 f'\nURL\n\t{self.api.base_url}/districts?address={optional_params["address"]}',
             )
         # check that the data matches what is saved on disk
-        saved_json = self._get_saved_response(self, 'districts')
-        assert saved_json
+        saved_json = self._get_saved_response('districts')
+        assert saved_json is not None
+        self.assertIn('timestamp', json_)
+        # example timestamp: 2020-05-01T02:58:11.283642
+        self.assertRegexpMatches(json_['timestamp'], r'20\d\d-\d{2}-\d{2}T\d{2}:\d{2}.\d{2}\.\d{6}')
+        self.assertIn('coords', json_)
+        self.assertIn('results', json_)
+        self.assertEqual(saved_json['coords']['latitude'], json_['coords']['latitude'])
+        self.assertEqual(saved_json['coords']['longitude'], json_['coords']['longitude'])
+        self.assertEqual(
+            sorted(saved_json['results'], key=itemgetter('id')),
+            sorted(json_['results'], key=itemgetter('id'))
+        )
 
-        assert False, "Finish the test!"
 
     def test_get_candidates(self):
         pass
@@ -53,17 +64,16 @@ class TestLiveCivicEngineApi(TestCase):
     def _check_data_directory_for_response(self, response):
         pass
 
-    def _get_saved_response(resource):
+    def _get_saved_response(self, resource):
         path_to_json = os.path.abspath(os.path.join(
             os.path.dirname(__file__),
             os.path.pardir,
             'data',
-            'civic_engine',
             f'{resource}.json'
         ))
         with open(path_to_json) as f:
-            saved_json = json.loads(f.read(), default=str)
-        return saved_json
+            saved_json = json.loads(f.read())
+            return saved_json
 
     def _check_api_response_matches_saved_response(self, resources):
         pass

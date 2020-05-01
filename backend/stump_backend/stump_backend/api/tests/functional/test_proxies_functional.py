@@ -52,6 +52,29 @@ class TestLiveCivicEngineApi(TestCase):
         )
 
 
+    def test_get_candidates_success_response(self):
+        candidate_id = 1
+        optional_params = {
+            'election_id': 1 
+        }
+        try:
+            success, json_ = self.api.get_candidate(candidate_id, optional_params=optional_params)
+            assert success, (
+                f'Error calling get candidate',
+                f'\nURL\n\t{self.api.base_url}/candidate/1?election_id={optional_params["election_id"]}',
+                f'\nresponse_code\n\t{json_["status_code"]}.',
+                f'\nresponse_body\n\t{json.dumps(json_["service_response"], indent=2, default=str)}')
+        except Timeout:
+            assert False, (
+                f'Timeout calling get districts after {self.api.timeout} seconds.',
+                f'\nURL\n\t{self.api.base_url}/candidate/1?election_id={optional_params["election_id"]}',
+            )
+        # check that the data matches what is saved on disk
+        saved_json = self._get_saved_response('candidate')
+        assert saved_json is not None
+        self.assertJSONEqual(json.dumps(json_), json.dumps(saved_json))
+
+
     def test_get_candidates(self):
         pass
 

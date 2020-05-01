@@ -1,14 +1,61 @@
 import json
 import os
+from copy import deepcopy
 from operator import itemgetter
 
-from django.test import TestCase
+from django.test import SimpleTestCase
 from requests.exceptions import Timeout
 
 from ...proxies.civicengine import CivicEngineApi
 
 
-class TestLiveCivicEngineApi(TestCase):
+class TestCivicEngineDistrictsEndpointSuccess(SimpleTestCase):
+    def setUp(self):
+        self.resource = 'districts'
+        self.saved_json = self._get_saved_response()
+        self.args = []
+        self.optional_params = {
+            'address': '12017+W+Alameda+Pkwy+Lakewood+CO+80228',
+        } 
+        self.api = CivicEngineApi(timeout=5)
+
+    def test_success_response(self):
+        try:
+            success, response_json = self.api.get_districts(optional_params=self.optional_params)
+            assert success, (
+                f'Error calling get districts',
+                f'\nURL\n\t{self.api.base_url}/districts?address={self.optional_params["address"]}',
+                f'\nresponse_code\n\t{response_json["status_code"]}.',
+                f'\nresponse_body\n\t{json.dumps(response_json["service_response"], indent=2, default=str)}')
+        except Timeout:
+            assert False, (
+                f'Timeout calling get districts after {self.api.timeout} seconds.',
+                f'\nURL\n\t{self.api.base_url}/districts?address={self.optional_params["address"]}',
+            )
+        self._check_json(response_json)
+
+    def _get_saved_response(self):
+            path_to_json = os.path.abspath(os.path.join(
+                os.path.dirname(__file__),
+                os.path.pardir,
+                'data',
+                f'{self.resource}.json'
+            ))
+            with open(path_to_json) as f:
+                saved_json = json.loads(f.read())
+                return saved_json
+
+    def _check_json(self, response_json):
+        saved_json = deepcopy(self.saved_json)  # so that we do not mess up the instances state in other tests when deleting timestamp keys
+        self.assertIn('timestamp', response_json)
+        # example timestamp: 2020-05-01T02:58:11.283642
+        self.assertRegexpMatches(response_json['timestamp'], r'20\d\d-\d{2}-\d{2}T\d{2}:\d{2}.\d{2}\.\d{6}')
+        del saved_json['timestamp']
+        del response_json['timestamp']
+        self.assertJSONEqual(json.dumps(response_json), json.dumps(saved_json))
+
+    
+class TestLiveCivicEngineApi(SimpleTestCase):
 
     def setUp(self):
         self.data_folder = ''
@@ -19,38 +66,6 @@ class TestLiveCivicEngineApi(TestCase):
 
     def tearDown(self):
         pass
-
-    def test_get_districts_success_response(self):
-        optional_params = {
-            'address': '12017+W+Alameda+Pkwy+Lakewood+CO+80228',
-        }
-        try:
-            success, json_ = self.api.get_districts(optional_params=optional_params)
-            assert success, (
-                f'Error calling get districts',
-                f'\nURL\n\t{self.api.base_url}/districts?address={optional_params["address"]}',
-                f'\nresponse_code\n\t{json_["status_code"]}.',
-                f'\nresponse_body\n\t{json.dumps(json_["service_response"], indent=2, default=str)}')
-        except Timeout:
-            assert False, (
-                f'Timeout calling get districts after {self.api.timeout} seconds.',
-                f'\nURL\n\t{self.api.base_url}/districts?address={optional_params["address"]}',
-            )
-        # check that the data matches what is saved on disk
-        saved_json = self._get_saved_response('districts')
-        assert saved_json is not None
-        self.assertIn('timestamp', json_)
-        # example timestamp: 2020-05-01T02:58:11.283642
-        self.assertRegexpMatches(json_['timestamp'], r'20\d\d-\d{2}-\d{2}T\d{2}:\d{2}.\d{2}\.\d{6}')
-        self.assertIn('coords', json_)
-        self.assertIn('results', json_)
-        self.assertEqual(saved_json['coords']['latitude'], json_['coords']['latitude'])
-        self.assertEqual(saved_json['coords']['longitude'], json_['coords']['longitude'])
-        self.assertEqual(
-            sorted(saved_json['results'], key=itemgetter('id')),
-            sorted(json_['results'], key=itemgetter('id'))
-        )
-
 
     def test_get_candidates_success_response(self):
         candidate_id = 1

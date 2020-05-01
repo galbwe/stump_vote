@@ -95,12 +95,21 @@ class CivicEngineApi(ApiCaller):
     CANDIDATE_RESOURCE = 'candidate'
     DISTRICTS_RESOURCE = 'districts'
     ELECTIONS_RESOURCE = 'elections'
-
+    MEASURES_RESOURCE = 'measures'
+    NORMALIZED_POSITIONS_RESOURCE = 'normalized-positions'
+    OFFICE_HOLDERS_RESOURCE = 'office-holders'
+    POLLING_PLACES_RESOURCE = 'polling_places' 
+    POSITIONS_RESOURCE = 'positions' 
     # This whitelist is used for validating the optional parameters
     resource_optional_params_map = {
         CANDIDATE_RESOURCE: ('election_id', 'tenant_id'),
         DISTRICTS_RESOURCE: ('address', 'lat', 'long'),
-        ELECTIONS_RESOURCE: ('end_at', 'latitude', 'longitude', 'start_at', 'state', 'updated_since')
+        ELECTIONS_RESOURCE: ('end_at', 'latitude', 'longitude', 'start_at', 'state', 'updated_since'),
+        MEASURES_RESOURCE: ('address', 'lat', 'lng', 'election_id', 'election_date'),  
+        NORMALIZED_POSITIONS_RESOURCE: tuple(), 
+        OFFICE_HOLDERS_RESOURCE: ('address', 'lat', 'lng'),
+        POLLING_PLACES_RESOURCE: ('election_id', 'latitude', 'longitude', 'street_number', 'pre_directional', 'street_name', 'street_suffix', 'post_directional', 'city', 'state', 'zipcode'), 
+        POSITIONS_RESOURCE: ('address', 'county', 'election_date', 'election_id', 'exclude_statewide', 'include_candidates', 'include_endorsements', 'include_office_holders', 'include_uncertified_candidates', 'include_volunteer_urls', 'lat', 'level', 'lon', 'search_radius', 'state', 'tier', 'year'), 
     }
 
     def __init__(self, *args, **kwargs):
@@ -132,7 +141,53 @@ class CivicEngineApi(ApiCaller):
         GET /elections
         See https://developers.civicengine.com/docs/api/elections/list
         '''
-        # TODO
         result = self.fetch(self.ELECTIONS_RESOURCE, optional_params=optional_params)
         # return the tuple (success, json)
         return result
+
+    def get_measures(self, optional_params=None):
+        '''
+        GET /elections
+        See https://developers.civicengine.com/docs/api/measures/list
+        '''
+        result = self.fetch(self.MEASURES_RESOURCE, optional_params=optional_params)
+        # return the tuple (success, json)
+        return result
+
+    def get_normalized_positions(self, optional_params=None):
+        '''
+        GET /elections
+        See https://developers.civicengine.com/docs/api/normalized-positions/list
+
+        '''
+        result = self.fetch(self.NORMALIZED_POSITIONS_RESOURCE, optional_params=optional_params)
+        # return the tuple (success, json)
+        return result
+
+    def get_office_holders(self, optional_params=None):
+        '''
+        GET /elections
+        See https://developers.civicengine.com/docs/api/office-holders/list
+        '''
+        result = self.fetch(self.OFFICE_HOLDERS_RESOURCE, optional_params=optional_params)
+        # return the tuple (success, json)
+        return result
+
+    def get_polling_places(self, optional_params=None):
+        '''
+        GET /elections
+        See https://developers.civicengine.com/docs/api/polling_places/list
+        '''
+        result = self.fetch(self.POLLING_PLACES_RESOURCE, optional_params=optional_params)
+        # return the tuple (success, json)
+        return result
+
+    def get_positions(self, optional_params=None):
+        '''
+        GET /elections
+        See https://developers.civicengine.com/docs/api/positions/list
+        '''
+        result = self.fetch(self.POSITIONS_RESOURCE, optional_params=optional_params)
+        # return the tuple (success, json)
+        return result
+

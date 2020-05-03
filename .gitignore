@@ -21,9 +21,6 @@ node_modules/
 # Ignore side-loaded files fetched by gulp
 backend/stump_backend/stump_backend/static/stump-vote-frontend-demo/
 
-# Test data
-**/data/
-
 # Virtual Environments
 **/venv/
 

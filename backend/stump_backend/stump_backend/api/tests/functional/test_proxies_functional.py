@@ -5,35 +5,37 @@ from operator import itemgetter
 
 from django.test import SimpleTestCase
 from requests.exceptions import Timeout
+from unittest import skip, skipIf
 
 from ...proxies.civicengine import CivicEngineApi
 
+class AbstractBaseMixin(object):
 
-class TestCivicEngineDistrictsEndpointSuccess(SimpleTestCase):
     def setUp(self):
-        self.resource = "districts"
+        # self.resource = "districts"
         self.saved_json = self._get_saved_response()
-        self.args = []
-        self.optional_params = {
-            "address": "12017+W+Alameda+Pkwy+Lakewood+CO+80228",
-        }
+        # self.args = []
+        # self.optional_params = {
+            # "address": "12017+W+Alameda+Pkwy+Lakewood+CO+80228",
+        # }
         self.api = CivicEngineApi(timeout=5)
+        # self.api_method = self.api.get_districts
 
     def test_success_response(self):
         try:
-            success, response_json = self.api.get_districts(
+            success, response_json = self.api_method(
                 optional_params=self.optional_params
             )
             assert success, (
-                f"Error calling get districts",
-                f'\nURL\n\t{self.api.base_url}/districts?address={self.optional_params["address"]}',
+                f"Error calling get {self.resource}",
+                f'\nURL\n\t{self.api.base_url}/{self.resource}{self._query_string}'
                 f'\nresponse_code\n\t{response_json["status_code"]}.',
                 f'\nresponse_body\n\t{json.dumps(response_json["service_response"], indent=2, default=str)}',
             )
         except Timeout:
             assert False, (
                 f"Timeout calling get districts after {self.api.timeout} seconds.",
-                f'\nURL\n\t{self.api.base_url}/districts?address={self.optional_params["address"]}',
+                f'\nURL\n\t{self.api.base_url}/{self.resource}{self._query_string}',
             )
         self._check_json(response_json)
 
@@ -49,11 +51,29 @@ class TestCivicEngineDistrictsEndpointSuccess(SimpleTestCase):
         with open(path_to_json) as f:
             saved_json = json.loads(f.read())
             return saved_json
+    
+    def _query_string(self):
+        if not self.optional_params:
+            return ""
+        return '?' + "&".join(f'{k}={v}' for (k, v) in self.optional_params.items())
+
+
+class TestCivicEngineGetDistrictsSuccess(AbstractBaseMixin, SimpleTestCase):
+
+    resource = "districts" 
+
+    def setUp(self):
+        super().setUp()
+        self.args = []
+        self.optional_params = {
+            "address": "12017+W+Alameda+Pkwy+Lakewood+CO+80228",
+        }
+        self.api_method = self.api.get_districts
 
     def _check_json(self, response_json):
         saved_json = deepcopy(
             self.saved_json
-        )  # so that we do not mess up the instances state in other tests when deleting timestamp keys
+        )  # so that we do not mess up the instance's state in other tests when deleting timestamp keys
         self.assertIn("timestamp", response_json)
         # example timestamp: 2020-05-01T02:58:11.283642
         self.assertRegexpMatches(
@@ -64,6 +84,7 @@ class TestCivicEngineDistrictsEndpointSuccess(SimpleTestCase):
         self.assertJSONEqual(json.dumps(response_json), json.dumps(saved_json))
 
 
+@skip
 class TestLiveCivicEngineApi(SimpleTestCase):
     def setUp(self):
         self.data_folder = ""

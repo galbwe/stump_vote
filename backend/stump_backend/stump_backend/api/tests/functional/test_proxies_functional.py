@@ -60,6 +60,19 @@ class AbstractBaseMixin(object):
             return ""
         return '?' + "&".join(f'{k}={v}' for (k, v) in self.optional_params.items())
 
+    def _check_json(self, response_json):
+        saved_json = deepcopy(
+            self.saved_json
+        )  # so that we do not mess up the instance's state in other tests when deleting timestamp keys
+        self.assertIn("timestamp", response_json)
+        # example timestamp: 2020-05-01T02:58:11.283642
+        self.assertRegexpMatches(
+            response_json["timestamp"], r"20\d\d-\d{2}-\d{2}T\d{2}:\d{2}.\d{2}\.\d{6}"
+        )
+        del saved_json["timestamp"]
+        del response_json["timestamp"]
+        self.assertJSONEqual(json.dumps(response_json), json.dumps(saved_json))
+
 
 class TestCivicEngineGetCandidatesSuccess(AbstractBaseMixin, SimpleTestCase):
 
@@ -91,19 +104,6 @@ class TestCivicEngineGetDistrictsSuccess(AbstractBaseMixin, SimpleTestCase):
         }
         self.api_method = self.api.get_districts
 
-    def _check_json(self, response_json):
-        saved_json = deepcopy(
-            self.saved_json
-        )  # so that we do not mess up the instance's state in other tests when deleting timestamp keys
-        self.assertIn("timestamp", response_json)
-        # example timestamp: 2020-05-01T02:58:11.283642
-        self.assertRegexpMatches(
-            response_json["timestamp"], r"20\d\d-\d{2}-\d{2}T\d{2}:\d{2}.\d{2}\.\d{6}"
-        )
-        del saved_json["timestamp"]
-        del response_json["timestamp"]
-        self.assertJSONEqual(json.dumps(response_json), json.dumps(saved_json))
-
 
 class TestCivicEngineGetElectionsSuccess(AbstractBaseMixin, SimpleTestCase):
 
@@ -120,19 +120,6 @@ class TestCivicEngineGetElectionsSuccess(AbstractBaseMixin, SimpleTestCase):
         }
         self.api_method = self.api.get_elections
 
-    def _check_json(self, response_json):
-        saved_json = deepcopy(
-            self.saved_json
-        )  # so that we do not mess up the instance's state in other tests when deleting timestamp keys
-        self.assertIn("timestamp", response_json)
-        # example timestamp: 2020-05-01T02:58:11.283642
-        self.assertRegexpMatches(
-            response_json["timestamp"], r"20\d\d-\d{2}-\d{2}T\d{2}:\d{2}.\d{2}\.\d{6}"
-        )
-        del saved_json["timestamp"]
-        del response_json["timestamp"]
-        self.assertJSONEqual(json.dumps(response_json), json.dumps(saved_json))
-
 
 class TestCivicEngineGetMeasuresSuccess(AbstractBaseMixin, SimpleTestCase):
 
@@ -146,19 +133,6 @@ class TestCivicEngineGetMeasuresSuccess(AbstractBaseMixin, SimpleTestCase):
             "election_id": 392,  # id for CO primary election
         }
         self.api_method = self.api.get_measures
-
-    def _check_json(self, response_json):
-        saved_json = deepcopy(
-            self.saved_json
-        )  # so that we do not mess up the instance's state in other tests when deleting timestamp keys
-        self.assertIn("timestamp", response_json)
-        # example timestamp: 2020-05-01T02:58:11.283642
-        self.assertRegexpMatches(
-            response_json["timestamp"], r"20\d\d-\d{2}-\d{2}T\d{2}:\d{2}.\d{2}\.\d{6}"
-        )
-        del saved_json["timestamp"]
-        del response_json["timestamp"]
-        self.assertJSONEqual(json.dumps(response_json), json.dumps(saved_json))
 
 
 class TestCivicEngineGetNormalizedPositionsSuccess(AbstractBaseMixin, SimpleTestCase):
@@ -175,7 +149,6 @@ class TestCivicEngineGetNormalizedPositionsSuccess(AbstractBaseMixin, SimpleTest
         self.assertJSONEqual(json.dumps(response_json), json.dumps(self.saved_json))
 
 
-
 class TestCivicEngineGetsOfficeHoldersSuccess(AbstractBaseMixin, SimpleTestCase):
 
     resource = "office-holders" 
@@ -187,19 +160,6 @@ class TestCivicEngineGetsOfficeHoldersSuccess(AbstractBaseMixin, SimpleTestCase)
             "address": "200+16th+St+Mall+Denver+CO+80202"
         }
         self.api_method = self.api.get_office_holders
-
-    def _check_json(self, response_json):
-        saved_json = deepcopy(
-            self.saved_json
-        )  # so that we do not mess up the instance's state in other tests when deleting timestamp keys
-        self.assertIn("timestamp", response_json)
-        # example timestamp: 2020-05-01T02:58:11.283642
-        self.assertRegexpMatches(
-            response_json["timestamp"], r"20\d\d-\d{2}-\d{2}T\d{2}:\d{2}.\d{2}\.\d{6}"
-        )
-        del saved_json["timestamp"]
-        del response_json["timestamp"]
-        self.assertJSONEqual(json.dumps(response_json), json.dumps(saved_json))
 
 
 class TestCivicEngineGetPollingPlacesSuccess(AbstractBaseMixin, SimpleTestCase):
@@ -215,19 +175,6 @@ class TestCivicEngineGetPollingPlacesSuccess(AbstractBaseMixin, SimpleTestCase):
             "longitude": -104.9883106,  
         }
         self.api_method = self.api.get_polling_places
-
-    def _check_json(self, response_json):
-        saved_json = deepcopy(
-            self.saved_json
-        )  # so that we do not mess up the instance's state in other tests when deleting timestamp keys
-        self.assertIn("timestamp", response_json)
-        # example timestamp: 2020-05-01T02:58:11.283642
-        self.assertRegexpMatches(
-            response_json["timestamp"], r"20\d\d-\d{2}-\d{2}T\d{2}:\d{2}.\d{2}\.\d{6}"
-        )
-        del saved_json["timestamp"]
-        del response_json["timestamp"]
-        self.assertJSONEqual(json.dumps(response_json), json.dumps(saved_json))
 
 
 class TestCivicEngineGetPositionsSuccess(AbstractBaseMixin, SimpleTestCase):

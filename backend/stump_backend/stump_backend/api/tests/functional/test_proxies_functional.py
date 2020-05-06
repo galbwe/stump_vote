@@ -1,4 +1,3 @@
-
 import json
 import os
 from copy import deepcopy
@@ -10,15 +9,17 @@ from unittest import skip, skipIf
 
 from ...proxies.civicengine import CivicEngineApi
 
-class AbstractBaseMixin(object):
 
+class AbstractBaseMixin(object):
     def setUp(self):
         # self.resource = "districts"
         self.saved_json = self._get_saved_response()
-        assert self.saved_json, f"Error loading saved civic engine response for resource {self.resource}."
+        assert (
+            self.saved_json
+        ), f"Error loading saved civic engine response for resource {self.resource}."
         # self.args = []
         # self.optional_params = {
-            # "address": "12017+W+Alameda+Pkwy+Lakewood+CO+80228",
+        # "address": "12017+W+Alameda+Pkwy+Lakewood+CO+80228",
         # }
         self.api = CivicEngineApi(timeout=5)
         # self.api_method = self.api.get_districts
@@ -26,19 +27,18 @@ class AbstractBaseMixin(object):
     def test_success_response(self):
         try:
             success, response_json = self.api_method(
-                *self.args,
-                optional_params=self.optional_params
+                *self.args, optional_params=self.optional_params
             )
             assert success, (
                 f"Error calling get {self.resource}",
-                f'\nURL\n\t{self.api.base_url}/{self.resource}{self._query_string}'
+                f"\nURL\n\t{self.api.base_url}/{self.resource}{self._query_string}"
                 f'\nresponse_code\n\t{response_json["status_code"]}.',
                 f'\nresponse_body\n\t{json.dumps(response_json["service_response"], indent=2, default=str)}',
             )
         except Timeout:
             assert False, (
                 f"Timeout calling get districts after {self.api.timeout} seconds.",
-                f'\nURL\n\t{self.api.base_url}/{self.resource}{self._query_string}',
+                f"\nURL\n\t{self.api.base_url}/{self.resource}{self._query_string}",
             )
         self._check_json(response_json)
 
@@ -54,11 +54,11 @@ class AbstractBaseMixin(object):
         with open(path_to_json) as f:
             saved_json = json.loads(f.read())
             return saved_json
-    
+
     def _query_string(self):
         if not self.optional_params:
             return ""
-        return '?' + "&".join(f'{k}={v}' for (k, v) in self.optional_params.items())
+        return "?" + "&".join(f"{k}={v}" for (k, v) in self.optional_params.items())
 
     def _check_json(self, response_json):
         saved_json = deepcopy(
@@ -94,7 +94,7 @@ class TestCivicEngineGetCandidatesSuccess(AbstractBaseMixin, SimpleTestCase):
 
 class TestCivicEngineGetDistrictsSuccess(AbstractBaseMixin, SimpleTestCase):
 
-    resource = "districts" 
+    resource = "districts"
 
     def setUp(self):
         super().setUp()
@@ -107,7 +107,7 @@ class TestCivicEngineGetDistrictsSuccess(AbstractBaseMixin, SimpleTestCase):
 
 class TestCivicEngineGetElectionsSuccess(AbstractBaseMixin, SimpleTestCase):
 
-    resource = "elections" 
+    resource = "elections"
 
     def setUp(self):
         super().setUp()
@@ -123,7 +123,7 @@ class TestCivicEngineGetElectionsSuccess(AbstractBaseMixin, SimpleTestCase):
 
 class TestCivicEngineGetMeasuresSuccess(AbstractBaseMixin, SimpleTestCase):
 
-    resource = "measures" 
+    resource = "measures"
 
     def setUp(self):
         super().setUp()
@@ -137,7 +137,7 @@ class TestCivicEngineGetMeasuresSuccess(AbstractBaseMixin, SimpleTestCase):
 
 class TestCivicEngineGetNormalizedPositionsSuccess(AbstractBaseMixin, SimpleTestCase):
 
-    resource = "normalized-positions" 
+    resource = "normalized-positions"
 
     def setUp(self):
         super().setUp()
@@ -151,14 +151,12 @@ class TestCivicEngineGetNormalizedPositionsSuccess(AbstractBaseMixin, SimpleTest
 
 class TestCivicEngineGetsOfficeHoldersSuccess(AbstractBaseMixin, SimpleTestCase):
 
-    resource = "office-holders" 
+    resource = "office-holders"
 
     def setUp(self):
         super().setUp()
         self.args = []
-        self.optional_params = {
-            "address": "200+16th+St+Mall+Denver+CO+80202"
-        }
+        self.optional_params = {"address": "200+16th+St+Mall+Denver+CO+80202"}
         self.api_method = self.api.get_office_holders
 
 
@@ -169,25 +167,25 @@ class TestCivicEngineGetPollingPlacesSuccess(AbstractBaseMixin, SimpleTestCase):
     def setUp(self):
         super().setUp()
         self.args = []
-        self.optional_params = { 
-            "election_id": 392, # CO general election
+        self.optional_params = {
+            "election_id": 392,  # CO general election
             "latitude": 39.7416945,
-            "longitude": -104.9883106,  
+            "longitude": -104.9883106,
         }
         self.api_method = self.api.get_polling_places
 
 
 class TestCivicEngineGetPositionsSuccess(AbstractBaseMixin, SimpleTestCase):
 
-    resource = "positions" 
+    resource = "positions"
 
     def setUp(self):
         super().setUp()
         self.args = []
-        self.optional_params = { 
+        self.optional_params = {
             "address": "200+16th+St+Mall+Denver+CO+80202",
             "include_candidates": 1,
-            "election_date": '2016-11-08',
+            "election_date": "2016-11-08",
         }
         self.api_method = self.api.get_positions
 
@@ -202,5 +200,5 @@ class TestCivicEngineGetPositionsSuccess(AbstractBaseMixin, SimpleTestCase):
         )
         del saved_json["timestamp"]
         del response_json["timestamp"]
-        saved_json["address"] = saved_json["address"].replace(' ', '+')
+        saved_json["address"] = saved_json["address"].replace(" ", "+")
         self.assertJSONEqual(json.dumps(response_json), json.dumps(saved_json))

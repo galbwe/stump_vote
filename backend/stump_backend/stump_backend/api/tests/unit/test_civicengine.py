@@ -1,9 +1,10 @@
 import os
+import pickle
 from unittest.mock import patch, MagicMock
-
 from unittest import TestCase
 
 from api.proxies.civicengine import ApiCaller, CivicEngineApi
+
 
 class MockApiBase(ApiCaller):
     base_url = "https://api.mock"
@@ -11,19 +12,19 @@ class MockApiBase(ApiCaller):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         try:
-            self.mock_response_path = kwargs['mock_response_path']
+            self.mock_data_dir = kwargs['mock_data_dir']
         except KeyError as e:
-            self.mock_response_path = os.path.abspath(os.path.join(
+            self.mock_data_dir = os.path.abspath(os.path.join(
+                os.path.dirname(__file__),
                 os.path.pardir,
-                'tests',
-                'data',
-                'mock_response.json'
+                'data'
             ))
+        self.mock_response_pkl = kwargs.get('mock_response_pkl', 'mock_success_response.pkl')
 
     def get_mock_response(self):
-        with open(mock_response_path) as f:
-            return json.loads(f.read())
-    
+        with open(os.path.join(self.mock_data_dir, self.mock_response_pkl), 'rb') as f:
+            return pickle.loads(f.read())
+
 
 class MockApiHeaders(MockApiBase):
     authentication_header = {"x-api-key": "mock-api-key"}
@@ -54,6 +55,7 @@ class TestApiCallerHeaders(TestCase):
             headers,
             dict()
         )
+
 
 class TestApiCallerParameterValidation(TestCase):
 
@@ -97,3 +99,32 @@ class TestApiCallerParameterValidation(TestCase):
             api._validate_optional_params('slkdfhjs23', {'optional_param_1': None}),
             None
         )
+
+
+class MockApiFetch(MockApiHeaders, MockApiValidation):
+
+    def _get_request(self, full_url, optional_params=None):
+        headers = self._get_headers()
+        response = self.get_mock_response()
+        return response        
+
+
+class TestApiCallerFetch(TestCase):
+
+    def setUp(self):
+        self.expected_responses = dict()
+        expected_success_response_pkl = os.path.abspath(os.path.join(
+            os.path.dirname(__file__),
+            os.path.pardir,
+            'data',
+            'mock_success_response.pkl'
+        ))
+        with open(expected_success_response_pkl, 'rb') as f:
+            self.expected_responses['success'] = pickle.loads(f.read())
+            
+
+    def test_success_response(self):
+        api = MockApiFetch(mock_response_pkl='mock_success_response.pkl')
+        success, json = api.fetch('mock', mock_param_1='testing')
+        self.assertTrue(success)
+        self.assertEqual(json, self.expected_responses['success'].json())

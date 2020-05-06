@@ -22,9 +22,11 @@ class MockApiBase(ApiCaller):
         self.mock_response_pkl = kwargs.get('mock_response_pkl', 'mock_success_response.pkl')
 
     def get_mock_response(self):
-        with open(os.path.join(self.mock_data_dir, self.mock_response_pkl), 'rb') as f:
-            return pickle.loads(f.read())
-
+        try:
+            with open(os.path.join(self.mock_data_dir, self.mock_response_pkl), 'rb') as f:
+                return pickle.loads(f.read())
+        except FileNotFoundError as e:
+            raise FileNotFoundError('Pickled mock response not found. Try running script to populate mock data.')
 
 class MockApiHeaders(MockApiBase):
     authentication_header = {"x-api-key": "mock-api-key"}
